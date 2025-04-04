@@ -1,0 +1,62 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/3/a/RAM64.hdl
+/**
+ * Memory of sixty four 16-bit registers.
+ * If load is asserted, the value of the register selected by
+ * address is set to in; Otherwise, the value does not change.
+ * The value of the selected register is emitted by out.
+ */
+CHIP RAM64 {
+    IN in[16], load, address[6];
+    OUT out[16];
+
+    PARTS:
+    
+    Not(in= address[5], out= na5);
+    Not(in= address[4], out= na4);
+    Not(in= address[3], out= na3);
+
+    And(a= na5, b= na4, out= na5na4);
+    And(a= na5na4, b= na3, out= or0); //First eighth of table 000
+    And(a= load, b= or0, out= load0);
+    RAM8(in= in, load= load0, address= address[0..2], out= out0);
+
+    And(a= na5na4, b= address[3], out= or1); //Second eighth of table 001
+    And(a= load, b= or1, out= load1);
+    RAM8(in= in, load= load1, address= address[0..2], out= out1);
+
+    And(a= na5, b= address[4], out= na5a4);
+    And(a= na5a4, b= na3, out= or2); //Third eighth of table 010
+    And(a= load, b= or2, out= load2);
+    RAM8(in= in, load= load2, address= address[0..2], out= out2);
+	
+    And(a= na5a4, b= address[3], out= or3); //Fourth eighth of table 011
+    And(a= load, b= or3, out= load3);
+    RAM8(in= in, load= load3, address= address[0..2], out= out3);
+	
+	And(a= address[5], b= na4, out= a5na4);
+	And(a= a5na4, b= na3, out= or4); //Fifth eighth of table 100
+    And(a= load, b= or4, out= load4);
+    RAM8(in= in, load= load4, address= address[0..2], out= out4);
+	
+	And(a= a5na4, b= address[3], out= or5); //Sixth eighth of table 101
+    And(a= load, b= or5, out= load5);
+    RAM8(in= in, load= load5, address= address[0..2], out= out5);
+	
+	And(a= address[5], b= address[4], out= a5a4);
+	And(a= a5a4, b= na3, out= or6); //Seventh eighth of table 110
+    And(a= load, b= or6, out= load6);
+    RAM8(in= in, load= load6, address= address[0..2], out= out6);
+	
+	And(a= a5a4, b= address[3], out= or7); //Eightth eighth of table 111
+    And(a= load, b= or7, out= load7);
+    RAM8(in= in, load= load7, address= address[0..2], out= out7);
+
+    Mux8Way16(a= out0, b= out1, c= out2, d= out3, 
+        e= out4, f= out5, g= out6, h= out7, sel= address[3..5], out= out);
+		
+    
+    CLOCKED in, load;
+}
